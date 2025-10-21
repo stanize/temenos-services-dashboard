@@ -73,4 +73,9 @@ public class TsmService {
             return "ERROR";
         }
     }
+    // 🔁 Placeholder for restart logic
+    public String restartTsm() {
+        return "Restart logic (via TAFJREST) will be added here.";
+    }
+
 }
