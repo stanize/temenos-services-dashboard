@@ -4,39 +4,51 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Properties;
 
 public class TsmService {
 
-    // ✅ TAFJREST endpoint
-    private static final String TAFJREST_URL = "http://localhost:8080/TAFJRestServices/resources/ofs";
-    // Comment here...
+    private final Properties config = new Properties();
 
-    // ✅ Authorization (Base64-encoded "username:password")
-    private static final String AUTH_HEADER = "Basic dGFmai5hZG1pbjpBWElAZ3RwcXJYNA==";
-
-    // ✅ OFS request to check TSM record
-    private static final String OFS_REQUEST = "TSA.SERVICE,/S/PROCESS,IGGI01/123123123,TSM";
+    public TsmService() {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+            if (input == null) {
+                throw new IOException("config.properties not found in resources folder");
+            }
+            config.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public String getTsmStatus() {
+        String tafjUrl = config.getProperty("tafjrest.url");
+        String user = config.getProperty("tafjrest.user");
+        String password = config.getProperty("tafjrest.password");
+
+        // Build Basic Auth header dynamically
+        String credentials = user + ":" + password;
+        String authHeader = config.getProperty("tafjrest.auth");
+
+        // --- You’ll later build the OFS request string dynamically ---
+        String ofsRequest = "TSA.SERVICE,/S/PROCESS," + user + "/" + password + ",TSM";
+
         try {
-            // Prepare request body
-            String jsonInput = "{\"ofsRequest\":\"" + OFS_REQUEST + "\"}";
+            String jsonInput = "{\"ofsRequest\":\"" + ofsRequest + "\"}";
             byte[] postData = jsonInput.getBytes(StandardCharsets.UTF_8);
 
-            // Open HTTP connection
-            URL url = new URL(TAFJREST_URL);
+            URL url = new URL(tafjUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", AUTH_HEADER);
+            conn.setRequestProperty("Authorization", authHeader);
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            // Send request payload
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(postData);
             }
 
-            // Read response from TAFJREST
             StringBuilder response = new StringBuilder();
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
@@ -46,17 +58,12 @@ public class TsmService {
                 }
             }
 
-            // Example response includes:
-            // "SERVICE.CONTROL:1:1=START,"
             String responseText = response.toString();
-
-            // Extract SERVICE.CONTROL field value
             String keyword = "SERVICE.CONTROL:1:1=";
             int index = responseText.indexOf(keyword);
             if (index != -1) {
                 int end = responseText.indexOf(",", index);
-                String status = responseText.substring(index + keyword.length(), end != -1 ? end : responseText.length());
-                return status;
+                return responseText.substring(index + keyword.length(), end != -1 ? end : responseText.length());
             }
 
             return "UNKNOWN";
@@ -65,10 +72,5 @@ public class TsmService {
             e.printStackTrace();
             return "ERROR";
         }
-    }
-
-    // 🔁 Placeholder for restart logic
-    public String restartTsm() {
-        return "Restart logic (via TAFJREST) will be added here.";
     }
 }
