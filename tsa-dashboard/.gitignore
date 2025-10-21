@@ -1,0 +1,39 @@
+# -----------------------------
+# IntelliJ IDEA
+# -----------------------------
+.idea/
+*.iml
+out/
+
+# -----------------------------
+# Maven
+# -----------------------------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# -----------------------------
+# Logs and temporary files
+# -----------------------------
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# -----------------------------
+# OS-specific files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# JBoss / WildFly runtime artifacts
+# -----------------------------
+standalone/tmp/
+standalone/data/
+standalone/log/
