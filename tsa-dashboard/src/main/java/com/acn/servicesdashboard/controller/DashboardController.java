@@ -16,7 +16,7 @@ public class DashboardController extends HttpServlet {
             throws ServletException, IOException {
 
         // Use TsmService instead of hardcoded values
-        req.setAttribute("jbossStatus", "Running");
+        req.setAttribute("jbossStatus", "Pending Logic Implementation");
         req.setAttribute("tsmStatus", tsmService.getTsmStatus());
 
         RequestDispatcher dispatcher = req.getRequestDispatcher("index.jsp");
